@@ -95,7 +95,7 @@ export default function Profile() {
 
   // Logout
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    // localStorage.removeItem('token');
     toast({ title: 'Logged out successfully', status: 'success' });
     setUser(null);
     router.push('/'); // Redirect to home or login page
