@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, VStack, Heading, Text, Input, useToast, HStack, Box } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -10,11 +11,18 @@ export default function Profile() {
   const [content, setContent] = useState('');
   const [editingNoteId, setEditingNoteId] = useState(null);
   const toast = useToast();
+  const router = useRouter();
 
   // Fetch Notes
   const fetchNotes = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        toast({ title: 'No token found, please log in', status: 'warning' });
+        router.push('/'); // Redirect to login page
+        return;
+      }
+
       const response = await axios.get("http://localhost:8000/note/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -85,6 +93,14 @@ export default function Profile() {
     setEditingNoteId(null);
   };
 
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    toast({ title: 'Logged out successfully', status: 'success' });
+    setUser(null);
+    router.push('/'); // Redirect to home or login page
+  };
+
   useEffect(() => {
     fetchNotes();
   }, []);
@@ -92,6 +108,9 @@ export default function Profile() {
   return (
     <VStack spacing={4} p={8}>
       <Heading>Profile</Heading>
+      <Button colorScheme="red" onClick={handleLogout}>
+        Logout
+      </Button>
       <Box>
         <Input 
           placeholder='Title' 
