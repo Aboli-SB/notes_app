@@ -2,10 +2,10 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-// Register a user (Only admins can create admins)
+// Register a user (Only admins can create another admin)
 exports.registerUser = async (req, res) => {
     try {
-        const { username, email, password, isAdmin } = req.body;
+        const { username, email, password, role } = req.body;
 
         if (!username || !email || !password) {
             return res.status(400).json({ message: "All fields are required" });
@@ -26,21 +26,19 @@ exports.registerUser = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Determine admin status (only an existing admin can create another admin)
-        let adminStatus = false;
-        if (isAdmin) {
-            if (!req.body.isAdmin) {
+        // Ensure only admins can create another admin
+        if (role === "admin") {
+            if (!req.user || req.user.userRole !== "admin") {
                 return res.status(403).json({ message: "Only admins can create another admin" });
             }
-            adminStatus = true;
         }
 
         // Create user
-        const newUser = await User.create({ username, email, password: hashedPassword, isAdmin: adminStatus });
+        const newUser = await User.create({ username, email, password: hashedPassword, role });
 
         // Generate JWT token
         const accessToken = jwt.sign(
-            { userId: newUser._id, isAdmin: newUser.isAdmin },
+            { userId: newUser._id, userRole: newUser.role },
             process.env.SECRET_KEY,
             { expiresIn: "1h" }
         );
@@ -51,6 +49,7 @@ exports.registerUser = async (req, res) => {
         res.status(500).json({ message: "Error registering user" });
     }
 };
+
 
 // Log in
 exports.loginUser = async (req, res) => {
@@ -69,7 +68,7 @@ exports.loginUser = async (req, res) => {
 
         // Generate JWT token with admin status
         const accessToken = jwt.sign(
-            { userId: user._id, isAdmin: user.isAdmin },
+            { userId: user._id, userRole: user.role},
             process.env.SECRET_KEY,
             { expiresIn: "1h" }
         );
@@ -99,7 +98,8 @@ exports.getUserProfile = async (req, res) => {
 // Get All Users (Only Admins Can Access)
 exports.getAllUsers = async (req, res) => {
     try {
-        if (!req.body.isAdmin) {
+        // Ensure req.user is populated and check role
+        if (!req.user || req.user.userRole !== "admin") {
             return res.status(403).json({ message: "Access denied. Admins only." });
         }
 
@@ -110,7 +110,6 @@ exports.getAllUsers = async (req, res) => {
         res.status(500).json({ message: "Error getting all users" });
     }
 };
-
 
 
 
