@@ -10,7 +10,7 @@ const authenticateUser = (req, res, next) => {
             if (err) return res.status(401).json({ message: "Invalid token. Please log in again." });
 
             req.body.userId = decoded.userId;
-            req.body.userRole = decoded.userRole;
+            req.body.isAdmin = decoded.isAdmin;
             next();
         });
     } catch (error) {

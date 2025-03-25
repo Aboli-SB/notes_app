@@ -1,4 +1,4 @@
-// File: C:\Users\AboliMore\OneDrive - Securityboat Cybersecurity Solution Private Limited\Desktop\Notes App\nextapp\app\profile\page.js
+// File: C:\Users\AboliMore\OneDrive - Securityboat Cybersecurity Solution Private Limited\Desktop\notes_app\nextapp\app\profile\page.js
 import * as entry from '../../../../app/profile/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
